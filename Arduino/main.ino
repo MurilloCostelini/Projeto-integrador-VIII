@@ -21,7 +21,10 @@ Stepper motor5(STEPS_PER_REV, 50, 52, 51, 53); // Motor VERDE
 
 const int MOTOR_SPEED = 15;
 
+const int RELE_PIN = 7;
+
 void realizarMovimento(Stepper &motor, int quantidade) {
+  digitalWrite(RELE_PIN, HIGH);
 
   for (int i = 0; i < quantidade; i++) {
     motor.step(DEGREE_STEPS * -155);
@@ -29,6 +32,8 @@ void realizarMovimento(Stepper &motor, int quantidade) {
     motor.step(DEGREE_STEPS * 155);
     delay(800);
   }
+  
+  digitalWrite(RELE_PIN, LOW);
 }
 
 void setup() {
@@ -37,6 +42,9 @@ void setup() {
   motor3.setSpeed(MOTOR_SPEED);
   motor4.setSpeed(MOTOR_SPEED);
   motor5.setSpeed(MOTOR_SPEED);
+
+  pinMode(RELE_PIN, OUTPUT);
+  digitalWrite(RELE_PIN, LOW);
 
   Serial.begin(9600);
   Serial.println("Pronto para receber comandos no formato 'COR QUANTIDADE'.");
