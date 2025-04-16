@@ -13,11 +13,11 @@
 
 */
 
-Stepper motor1(STEPS_PER_REV, 2, 4, 3, 5); // Motor LARANJA
-Stepper motor2(STEPS_PER_REV, 28, 30, 29, 31); // Motor VERMELHO
-Stepper motor3(STEPS_PER_REV, 36, 38, 37, 39); // Motor AMARELO
-Stepper motor4(STEPS_PER_REV, 44, 46, 45, 47); // Motor AZUL
-Stepper motor5(STEPS_PER_REV, 50, 52, 51, 53); // Motor VERDE
+Stepper motor1(STEPS_PER_REV, 2, 4, 3, 5);      // Motor LARANJA    - 1
+Stepper motor2(STEPS_PER_REV, 28, 30, 29, 31);  // Motor VERMELHO   - 2
+Stepper motor3(STEPS_PER_REV, 36, 38, 37, 39);  // Motor AMARELO    - 3
+Stepper motor4(STEPS_PER_REV, 44, 46, 45, 47);  // Motor AZUL       - 4
+Stepper motor5(STEPS_PER_REV, 50, 52, 51, 53);  // Motor VERDE      - 5
 
 const int MOTOR_SPEED = 15;
 

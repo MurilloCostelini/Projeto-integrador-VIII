@@ -19,19 +19,32 @@ except Exception as e:
 
 def enviar_comando(comando):
     """Envia um comando para o Arduino via porta serial."""
-    print(f"\nComando recebido: {comando}\n")
-    
+    print(f"Enviando comando arduino: {comando}")
     if arduino:
-        arduino.write(f"{comando}\n".encode())
-        print(f"Comando enviado: {comando}")
+        try:
+            arduino.write(f"{comando}\n".encode())
+            print(f"Comando enviado ao Arduino: {comando}")
+        except Exception as e:
+            print(f"Erro ao enviar comando: {e}")
     else:
         print("Erro: Arduino não conectado.")
 
-def abrir_jogo(caminho, comando_arduino):
-    """Abre o jogo especificado e envia o comando ao Arduino."""
-    subprocess.Popen(["python", caminho])
-    enviar_comando(comando_arduino)
 
+def processar_caca_palavra():
+    def receber_resultado(quantidades):
+        print(f"Quantidades distribuídas Caca Palavra: \t\t{quantidades}")
+        lista_quantidades = list(quantidades.values())  # Converte o dict em uma lista
+        enviar_comando(",".join(map(str, lista_quantidades)))  # Envia ao Arduino
+
+    CacaPalavrasGame(callback=receber_resultado)
+
+def processar_roleta():
+    def receber_resultado(quantidades):
+        print(f"Quantidades distribuídas Roleta: \t\t{quantidades}")
+        lista_quantidades = list(quantidades.values())  # Converte o dict em uma lista
+        enviar_comando(",".join(map(str, lista_quantidades)))  # Envia ao Arduino
+
+    jogar_roleta(root, callback=receber_resultado)
 
 def recolher_mms():
     """Simula o comando de recolher 6 M&Ms."""
@@ -72,32 +85,19 @@ def criar_botao(frame, text, command):
     )
     return botao
 
-def processar_caca_palavra():
-    def receber_resultado(quantidades):
-        print(f"Quantidades distribuídas Caca Palavra: \t\t{quantidades}")
-
-    CacaPalavrasGame(callback=receber_resultado)
 
 # Botões dos jogos
 botao_caca_palavras = criar_botao(
-    frame_jogos, 
-    "Caça-Palavras", 
+    frame_jogos,
+    "Caça-Palavras",
     lambda: processar_caca_palavra()
 )
 
-def processar_roleta():
-    def receber_resultado(quantidades):
-        print(f"Quantidades distribuídas Roleta: \t\t{quantidades}")
-
-    jogar_roleta(root, callback=receber_resultado)
-
-
 botao_roleta = criar_botao(
-    frame_jogos, 
-    "Roleta", 
+    frame_jogos,
+    "Roleta",
     lambda: processar_roleta()
 )
-
 
 # Organizar os botões em grade
 botao_caca_palavras.grid(row=0, column=0, padx=20, pady=20)
