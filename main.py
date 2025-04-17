@@ -1,3 +1,14 @@
+# Coisas para arrumar: 
+
+# - Ocultar caca palavra antes de iniciar o jogo
+# - Bloquear o "voltar" enquanto jogo esta ativo
+# - Adicionar Embaralhar durante partida
+# - Tirar caixas de notificação do resultado e mostrar na tela (*"BONITINHO"*)
+# - Implementar envio para o arduino
+# - Sobreposição de letra no caca palavra
+# - LOGO SENAC?
+
+
 import tkinter as tk
 from tkinter import ttk, messagebox
 import random
