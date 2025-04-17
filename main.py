@@ -6,7 +6,7 @@ import math
 import string
 import os
 
-fundo = '#FDC180'
+fundo = "#FDC180"
 
 fundo_botao_menu = "#FFFFFF"
 
@@ -14,7 +14,9 @@ letra_titulo_menu = "#004A8D"
 
 letra_botao_menu = "#004A8D"
 
-fundo_roleta = '#FDC180'
+fundo_roleta = "#FDC180"
+
+letra_dados_caca_palavra = "#FFFFFF"
 
 class MainApplication:
     def __init__(self, root):
@@ -285,7 +287,7 @@ class CacaPalavrasFrame(tk.Frame):
             self.frame_controle,
             text=f"Tempo: {self.tempo_restante}s",
             font=("Helvetica", 14),
-            fg="white",
+            fg=letra_dados_caca_palavra,
             bg=fundo
         )
         self.tempo_label.grid(row=0, column=0, padx=10)
@@ -294,7 +296,7 @@ class CacaPalavrasFrame(tk.Frame):
             self.frame_controle,
             text=f"Pontos: {self.pontuacao}",
             font=("Helvetica", 14),
-            fg="white",
+            fg=letra_dados_caca_palavra,
             bg=fundo
         )
         self.pontuacao_label.grid(row=0, column=1, padx=10)
