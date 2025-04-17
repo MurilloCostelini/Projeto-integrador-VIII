@@ -396,7 +396,7 @@ class CacaPalavrasFrame(tk.Frame):
             btn.config(bg="white")
             self.selecao.remove((x, y))
         else:
-            btn.config(bg="yellow")
+            btn.config(bg="gray")
             self.selecao.append((x, y))
         
         palavra = self.verificar_palavra()
