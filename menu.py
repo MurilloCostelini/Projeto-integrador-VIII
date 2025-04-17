@@ -1,17 +1,17 @@
 import tkinter as tk
-import subprocess
+from tkinter import ttk
 import serial
 import time
 from Jogos.caca_palavra import CacaPalavrasGame
 from Jogos.roleta import jogar_roleta
 
-# Configuração da porta serial (ajuste conforme necessário)
-PORTA_SERIAL = 'COM6'  # Substitua pela porta correta do Arduino
+# Configuração da porta serial
+PORTA_SERIAL = 'COM6'
 BAUD_RATE = 9600
 
 try:
     arduino = serial.Serial(PORTA_SERIAL, BAUD_RATE, timeout=1)
-    time.sleep(2)  # Aguarda inicialização da porta serial
+    time.sleep(2)
     print("Conexão com o Arduino estabelecida!")
 except Exception as e:
     print(f"Erro ao conectar na porta serial: {e}")
@@ -29,92 +29,129 @@ def enviar_comando(comando):
     else:
         print("Erro: Arduino não conectado.")
 
-
-def processar_caca_palavra():
-    def receber_resultado(quantidades):
-        print(f"Quantidades distribuídas Caca Palavra: \t\t{quantidades}")
-        lista_quantidades = list(quantidades.values())  # Converte o dict em uma lista
-        enviar_comando(",".join(map(str, lista_quantidades)))  # Envia ao Arduino
-
-    CacaPalavrasGame(callback=receber_resultado)
-
-def processar_roleta():
-    def receber_resultado(quantidades):
-        print(f"Quantidades distribuídas Roleta: \t\t{quantidades}")
-        lista_quantidades = list(quantidades.values())  # Converte o dict em uma lista
-        enviar_comando(",".join(map(str, lista_quantidades)))  # Envia ao Arduino
-
-    jogar_roleta(root, callback=receber_resultado)
-
-def recolher_mms():
-    """Simula o comando de recolher 6 M&Ms."""
-    print("Recolher 6 M&Ms")
-    enviar_comando("RECOLHER")
+class MainApplication:
+    def __init__(self, root):
+        self.root = root
+        self.setup_window()
+        self.create_widgets()
+        
+    def setup_window(self):
+        self.root.title("Separador de M&Ms")
+        self.root.configure(bg="#2e2e2e")
+        
+        # Configuração responsiva
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        
+        # Centralizar janela e ajustar ao tamanho da tela
+        window_width = 1000
+        window_height = 800
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        x_position = (screen_width - window_width) // 2
+        y_position = (screen_height - window_height) // 2
+        
+        self.root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+        self.root.minsize(800, 600)  # Tamanho mínimo
+        
+    def create_widgets(self):
+        # Estilo para os widgets
+        style = ttk.Style()
+        style.configure('TFrame', background='#2e2e2e')
+        style.configure('Gold.TLabel', 
+                        foreground='#FFD700', 
+                        background='#2e2e2e', 
+                        font=('Helvetica', 40, 'bold'))
+        style.configure('Game.TButton', 
+                       foreground='white', 
+                       background='#3e3e3e',
+                       font=('Helvetica', 14, 'bold'),
+                       padding=10)
+        style.configure('Action.TButton', 
+                       foreground='white', 
+                       background='#5e5e5e',
+                       font=('Helvetica', 18, 'bold'),
+                       padding=10)
+        
+        # Frame principal
+        main_frame = ttk.Frame(self.root)
+        main_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
+        main_frame.columnconfigure(0, weight=1)
+        
+        # Título
+        titulo = ttk.Label(
+            main_frame,
+            text="Separador de M&Ms",
+            style='Gold.TLabel'
+        )
+        titulo.grid(row=0, column=0, pady=(0, 30))
+        
+        # Frame para os jogos
+        games_frame = ttk.Frame(main_frame)
+        games_frame.grid(row=1, column=0, pady=20, sticky='nsew')
+        games_frame.columnconfigure(0, weight=1)
+        games_frame.columnconfigure(1, weight=1)
+        
+        # Botões dos jogos
+        botao_caca_palavras = ttk.Button(
+            games_frame,
+            text="Caça-Palavras",
+            style='Game.TButton',
+            command=self.processar_caca_palavra
+        )
+        botao_caca_palavras.grid(row=0, column=0, padx=20, pady=20, sticky='nsew')
+        
+        botao_roleta = ttk.Button(
+            games_frame,
+            text="Roleta",
+            style='Game.TButton',
+            command=self.processar_roleta
+        )
+        botao_roleta.grid(row=0, column=1, padx=20, pady=20, sticky='nsew')
+        
+        # Botão de ação
+        botao_recolher = ttk.Button(
+            main_frame,
+            text="Recolher 6 M&Ms",
+            style='Action.TButton',
+            command=self.recolher_mms
+        )
+        botao_recolher.grid(row=2, column=0, pady=(20, 0), sticky='ew')
+        
+        # Configurar expansão dos elementos
+        main_frame.rowconfigure(1, weight=1)
+        
+    def processar_caca_palavra(self):
+        def receber_resultado(quantidades):
+            print(f"Quantidades distribuídas Caca Palavra: \t\t{quantidades}")
+            lista_quantidades = list(quantidades.values())
+            enviar_comando(",".join(map(str, lista_quantidades)))
+        
+        # Esconder a janela principal
+        self.root.withdraw()
+        CacaPalavrasGame(callback=receber_resultado, on_close=self.show_main_window)
+    
+    def processar_roleta(self):
+        def receber_resultado(quantidades):
+            print(f"Quantidades distribuídas Roleta: \t\t{quantidades}")
+            lista_quantidades = list(quantidades.values())
+            enviar_comando(",".join(map(str, lista_quantidades)))
+        
+        # Esconder a janela principal
+        self.root.withdraw()
+        jogar_roleta(self.root, callback=receber_resultado, on_close=self.show_main_window)
+    
+    def recolher_mms(self):
+        """Simula o comando de recolher 6 M&Ms."""
+        print("Recolher 6 M&Ms")
+        enviar_comando("RECOLHER")
+    
+    def show_main_window(self):
+        """Mostra novamente a janela principal."""
+        self.root.deiconify()
 
 # Configuração da janela principal
 root = tk.Tk()
-root.title("Separador de M&Ms")
-root.geometry("1080x1080")
-root.configure(bg="#2e2e2e")  # Fundo cinza escuro (modo noturno)
-
-# Título
-titulo = tk.Label(
-    root,
-    text="Separador de M&Ms",
-    font=("Helvetica", 40, "bold"),
-    fg="#FFD700",  # Cor dourada
-    bg="#2e2e2e",
-)
-titulo.pack(pady=30)
-
-# Frame para os botões dos jogos
-frame_jogos = tk.Frame(root, bg="#2e2e2e")
-frame_jogos.pack(expand=True)
-
-# Função para criar botões
-def criar_botao(frame, text, command):
-    botao = tk.Button(
-        frame,
-        text=text,
-        font=("Helvetica", 14, "bold"),
-        fg="white",
-        bg="#3e3e3e",
-        width=20,
-        height=5,
-        command=command,
-    )
-    return botao
-
-
-# Botões dos jogos
-botao_caca_palavras = criar_botao(
-    frame_jogos,
-    "Caça-Palavras",
-    lambda: processar_caca_palavra()
-)
-
-botao_roleta = criar_botao(
-    frame_jogos,
-    "Roleta",
-    lambda: processar_roleta()
-)
-
-# Organizar os botões em grade
-botao_caca_palavras.grid(row=0, column=0, padx=20, pady=20)
-botao_roleta.grid(row=0, column=1, padx=20, pady=20)
-
-# Botão para "Recolher 6 M&Ms"
-botao_recolher = tk.Button(
-    root,
-    text="Recolher 6 M&Ms",
-    font=("Helvetica", 18, "bold"),
-    fg="white",
-    bg="#5e5e5e",
-    width=20,
-    height=2,
-    command=recolher_mms,
-)
-botao_recolher.pack(pady=20)
-
-# Executa a janela principal
+app = MainApplication(root)
 root.mainloop()

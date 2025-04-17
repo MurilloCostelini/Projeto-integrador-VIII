@@ -4,21 +4,23 @@ import random
 import string
 
 class CacaPalavrasGame:
-    def __init__(self, callback=None):
-        self.callback = callback  # Permite passar um callback para capturar a pontuação
+    def __init__(self, callback=None, on_close=None):
+        self.callback = callback
+        self.on_close = on_close
         self.root = tk.Tk()
         self.root.title("Caça-Palavras")
+        self.root.protocol("WM_DELETE_WINDOW", self.fechar_jogo)
 
         # Configurações iniciais
-        self.tabela_size = 15  # Tamanho do tabuleiro (15x15)
+        self.tabela_size = 15
         self.palavras = ["VERMELHO", "AMARELO", "AZUL", "LARANJA", "VERDE"]
         self.tabela = []
         self.labels = []
         self.selecao = []
         self.pontuacao = 0
-        self.tempo_restante = 120  # Tempo total em segundos
+        self.tempo_restante = 120
         self.jogando = True
-        self.palavras_encontradas = set()  # Rastreamento de palavras encontradas
+        self.palavras_encontradas = set()
 
         # Inicializa a interface e o jogo
         self.setup_ui()
@@ -32,7 +34,6 @@ class CacaPalavrasGame:
         self.frame_tabuleiro = tk.Frame(self.root)
         self.frame_tabuleiro.pack()
 
-        # Cria os botões do tabuleiro
         for i in range(self.tabela_size):
             linha = []
             for j in range(self.tabela_size):
@@ -49,7 +50,6 @@ class CacaPalavrasGame:
                 linha.append(btn)
             self.labels.append(linha)
 
-        # Adiciona painel de controle
         self.frame_controle = tk.Frame(self.root)
         self.frame_controle.pack(pady=10)
 
@@ -125,7 +125,7 @@ class CacaPalavrasGame:
                 self.finalizar_jogo()
 
     def get_palavra_selecionada(self):
-        """Constrói a palavra a partir das letras selecionadas, considerando a direção."""
+        """Constrói a palavra a partir das letras selecionadas."""
         if len(self.selecao) < 2:
             return ""
 
@@ -145,6 +145,16 @@ class CacaPalavrasGame:
             self.labels[x][y].config(bg="green", state="disabled")
         self.selecao = []
 
+    def fechar_jogo(self):
+        """Função para tratar o fechamento da janela."""
+        if self.jogando and self.callback:
+            pontuacoes_palavras = {palavra: 0 for palavra in self.palavras}
+            self.callback(pontuacoes_palavras)
+        
+        self.root.destroy()
+        if self.on_close:
+            self.on_close()
+
     def finalizar_jogo(self):
         self.jogando = False
         for linha in self.labels:
@@ -153,19 +163,17 @@ class CacaPalavrasGame:
 
         messagebox.showinfo("Parabéns!", f"Você encontrou todas as palavras! Pontuação final: {self.pontuacao}")
 
-        # Chama o callback com as pontuações
         if self.callback:
             pontuacoes_palavras = {palavra: (3 if palavra in self.palavras_encontradas else 0) for palavra in self.palavras}
-            self.callback(pontuacoes_palavras)  # Chama o callback com as pontuações
+            self.callback(pontuacoes_palavras)
 
-        self.root.destroy()
+        self.root.after(1000, self.fechar_jogo)
 
     def iniciar_cronometro(self):
-        """Inicia o cronômetro do jogo."""
         if self.tempo_restante > 0 and self.jogando:
             self.tempo_restante -= 1
             self.tempo_label.config(text=f"Tempo: {self.tempo_restante}s")
-            self.root.after(1000, lambda: self.iniciar_cronometro())  # Usando lambda para garantir a referência correta
+            self.root.after(1000, self.iniciar_cronometro)
         elif self.jogando:
             self.jogando = False
             for linha in self.labels:
@@ -173,12 +181,11 @@ class CacaPalavrasGame:
                     label.config(state="disabled")
 
             messagebox.showinfo("Fim de Jogo", f"Tempo esgotado! Pontuação final: {self.pontuacao}")
-            # Criando a lista de pontuações por palavra
             if self.callback:
                 pontuacoes_palavras = {palavra: (3 if palavra in self.palavras_encontradas else 0) for palavra in self.palavras}
-                self.callback(pontuacoes_palavras)  # Chama o callback com as pontuações
+                self.callback(pontuacoes_palavras)
 
-            self.root.destroy()
+            self.root.after(1000, self.fechar_jogo)
 
     def reiniciar_jogo(self):
         """Reinicia o jogo."""
