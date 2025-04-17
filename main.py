@@ -326,6 +326,8 @@ class CacaPalavrasFrame(tk.Frame):
         # Cria o tabuleiro mas não inicia o jogo ainda
         self.criar_tabuleiro()
 
+        self.frame_tabuleiro.pack_forget()
+
     def criar_tabuleiro(self):
         # Inicializa tabela vazia
         self.tabela = [["" for _ in range(self.tabela_size)] for _ in range(self.tabela_size)]
@@ -462,6 +464,8 @@ class CacaPalavrasFrame(tk.Frame):
                 for btn in linha:
                     btn.config(state="normal", bg="white")
             
+            self.frame_tabuleiro.pack(pady=20)
+
             self.iniciar_cronometro()
     
     def reiniciar_jogo(self):
