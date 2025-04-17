@@ -326,7 +326,7 @@ class CacaPalavrasFrame(tk.Frame):
             self.frame_controle,
             text="Iniciar Jogo",
             style='Game.TButton',
-            command=self.iniciar_jogo  # Agora chama iniciar_jogo ao invés de reiniciar_jogo
+            command=self.iniciar_jogo 
         )
         self.btn_iniciar.grid(row=0, column=2, padx=20)
         
@@ -424,8 +424,15 @@ class CacaPalavrasFrame(tk.Frame):
         return "".join(self.tabela[x][y] for x, y in self.selecao)
     
     def marcar_palavra(self, palavra):
+        if palavra == "VERMELHO": cor = "red"
+        if palavra == "VERDE": cor = "green"
+        if palavra == "AMARELO": cor = "yellow"
+        if palavra == "AZUL": cor = "blue"
+        if palavra == "LARANJA": cor = "orange"
+
+
         for x, y in self.selecao:
-            self.labels[x][y].config(bg="green", state="disabled")
+            self.labels[x][y].config(bg=cor, state="disabled")
         self.selecao = []
     
     def iniciar_cronometro(self):
@@ -465,6 +472,14 @@ class CacaPalavrasFrame(tk.Frame):
             self.pontuacao_label.config(text=f"Pontos: {self.pontuacao}")
             self.tempo_label.config(text=f"Tempo: {self.tempo_restante}s")
             self.btn_iniciar.config(text="Reiniciar")
+
+            for linha in self.labels:
+                for btn in linha:
+                    btn.destroy()
+            self.labels = []
+            
+            # Recria o tabuleiro
+            self.criar_tabuleiro()
             
             # Habilita todos os botões do tabuleiro
             for linha in self.labels:
@@ -474,20 +489,6 @@ class CacaPalavrasFrame(tk.Frame):
             self.frame_tabuleiro.pack(pady=20)
 
             self.iniciar_cronometro()
-    
-    def reiniciar_jogo(self):
-        """Reinicia o jogo completamente"""
-        # Limpa o tabuleiro atual
-        for linha in self.labels:
-            for btn in linha:
-                btn.destroy()
-        self.labels = []
-        
-        # Recria o tabuleiro
-        self.criar_tabuleiro()
-
-        # Reinicia o jogo
-        self.iniciar_jogo()
 
 if __name__ == "__main__":
     root = tk.Tk()
