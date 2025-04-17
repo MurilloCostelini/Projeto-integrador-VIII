@@ -38,22 +38,18 @@ class MainApplication:
     def setup_window(self):
         self.root.title("Separador de M&Ms")
         self.root.configure(bg="#2e2e2e")
-        
+
         # Configuração responsiva
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        
-        # Centralizar janela e ajustar ao tamanho da tela
-        window_width = 1000
-        window_height = 800
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        
-        x_position = (screen_width - window_width) // 2
-        y_position = (screen_height - window_height) // 2
-        
-        self.root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
-        self.root.minsize(800, 600)  # Tamanho mínimo
+
+        # Fullscreen
+        self.root.attributes('-fullscreen', True)
+
+        self.root.bind("<Escape>", lambda event: self.root.attributes("-fullscreen", False))
+
+        # Tamanho mínimo ainda pode ser mantido, se quiser permitir sair do fullscreen
+        self.root.minsize(800, 600)
         
     def create_widgets(self):
         # Estilo para os widgets
@@ -64,12 +60,12 @@ class MainApplication:
                         background='#2e2e2e', 
                         font=('Helvetica', 40, 'bold'))
         style.configure('Game.TButton', 
-                       foreground='white', 
-                       background='#3e3e3e',
+                       foreground='red', # cor da letra botoes de jogo
+                       background='#ffffff',
                        font=('Helvetica', 14, 'bold'),
-                       padding=10)
+                       padding=25)
         style.configure('Action.TButton', 
-                       foreground='white', 
+                       foreground='white', # letra botao demonstracao 
                        background='#5e5e5e',
                        font=('Helvetica', 18, 'bold'),
                        padding=10)
