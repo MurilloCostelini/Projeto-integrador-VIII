@@ -129,7 +129,12 @@ class RoletaFrame(tk.Frame):
         self.controller = controller
         self.callback = None
         self.setup_ui()
+        self.jogando = False
     
+    def voltar_se_permitido(self):
+        if not self.jogando:
+            self.controller.show_frame("MenuFrame")
+            
     def setup_ui(self):
         self.configure(bg=fundo)
         
@@ -142,7 +147,7 @@ class RoletaFrame(tk.Frame):
             main_frame,
             text="Voltar ao Menu",
             style='Action.TButton',
-            command=lambda: self.controller.show_frame("MenuFrame")
+            command= self.voltar_se_permitido
         )
         btn_voltar.pack(pady=20, anchor="nw")
         
@@ -203,6 +208,7 @@ class RoletaFrame(tk.Frame):
     
     def girar_seta(self):
         self.btn_girar.config(state="disabled")
+        self.jogando = True
         
         duracao_total = 3000  # 3 segundos
         passos_totais = 300
@@ -229,6 +235,7 @@ class RoletaFrame(tk.Frame):
                 quantidades = self.gerar_comando(numero_vencedor)
                 self.exibir_resultado(quantidades, numero_vencedor)
                 self.btn_girar.config(state="normal")
+                self.jogando = False
         
         animar_giro()
     
