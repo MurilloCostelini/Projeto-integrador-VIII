@@ -28,6 +28,7 @@ letra_titulo_menu = AZUL_SENAC
 letra_botao_menu = AZUL_SENAC
 fundo_roleta = "white"       # Fundo do canvas da roleta
 letra_dados_caca_palavra = AZUL_SENAC
+selecao_letra_caca_palavra = "sandy brown" # "tan" "burlywood" "wheat" "peru" "sandy brown"
 
 # Variável para ajuste do padding do canvas da roleta
 PADDING_CANVAS_ROLETA = 100  # Valor padrão, pode ser ajustado
@@ -396,7 +397,7 @@ class CacaPalavrasFrame(tk.Frame):
             btn.config(bg="white")
             self.selecao.remove((x, y))
         else:
-            btn.config(bg="gray")
+            btn.config(bg=selecao_letra_caca_palavra)
             self.selecao.append((x, y))
         
         palavra = self.verificar_palavra()
