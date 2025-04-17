@@ -247,6 +247,7 @@ class CacaPalavrasFrame(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.callback = None
+        self.jogando = False  # Inicialmente não está jogando
         self.setup_ui()
     
     def setup_ui(self):
@@ -273,7 +274,6 @@ class CacaPalavrasFrame(tk.Frame):
         self.selecao = []
         self.pontuacao = 0
         self.tempo_restante = 120
-        self.jogando = True
         self.palavras_encontradas = set()
         
         # Frame do tabuleiro
@@ -284,7 +284,7 @@ class CacaPalavrasFrame(tk.Frame):
         self.frame_controle = tk.Frame(main_frame, bg=fundo)
         self.frame_controle.pack(pady=20)
         
-        # Labels de informação com fonte Helvetica
+        # Labels de informação
         self.tempo_label = tk.Label(
             self.frame_controle,
             text=f"Tempo: {self.tempo_restante}s",
@@ -303,19 +303,18 @@ class CacaPalavrasFrame(tk.Frame):
         )
         self.pontuacao_label.grid(row=0, column=1, padx=20)
         
-        # Botão de reiniciar
-        self.btn_reiniciar = ttk.Button(
+        # Botão de iniciar/reiniciar
+        self.btn_iniciar = ttk.Button(
             self.frame_controle,
-            text="Reiniciar",
+            text="Iniciar Jogo",
             style='Game.TButton',
-            command=self.reiniciar_jogo
+            command=self.iniciar_jogo  # Agora chama iniciar_jogo ao invés de reiniciar_jogo
         )
-        self.btn_reiniciar.grid(row=0, column=2, padx=20)
+        self.btn_iniciar.grid(row=0, column=2, padx=20)
         
-        # Iniciar o jogo
+        # Cria o tabuleiro mas não inicia o jogo ainda
         self.criar_tabuleiro()
-        self.iniciar_cronometro()
-    
+
     def criar_tabuleiro(self):
         # Inicializa tabela vazia
         self.tabela = [["" for _ in range(self.tabela_size)] for _ in range(self.tabela_size)]
@@ -435,29 +434,38 @@ class CacaPalavrasFrame(tk.Frame):
         if self.callback:
             resultado = {palavra: 3 if palavra in self.palavras_encontradas else 0 
                         for palavra in self.palavras}
-            self.callback(resultado)
+
+    def iniciar_jogo(self):
+        """Inicia o jogo quando o botão é clicado"""
+        if not self.jogando:
+            self.jogando = True
+            self.palavras_encontradas = set()
+            self.pontuacao = 0
+            self.tempo_restante = 120
+            self.pontuacao_label.config(text=f"Pontos: {self.pontuacao}")
+            self.tempo_label.config(text=f"Tempo: {self.tempo_restante}s")
+            self.btn_iniciar.config(text="Reiniciar")
+            
+            # Habilita todos os botões do tabuleiro
+            for linha in self.labels:
+                for btn in linha:
+                    btn.config(state="normal", bg="white")
+            
+            self.iniciar_cronometro()
     
     def reiniciar_jogo(self):
+        """Reinicia o jogo completamente"""
         # Limpa o tabuleiro atual
         for linha in self.labels:
             for btn in linha:
                 btn.destroy()
         self.labels = []
         
-        # Reinicia variáveis
-        self.pontuacao = 0
-        self.tempo_restante = 120
-        self.palavras_encontradas = set()
-        self.selecao = []
-        self.jogando = True
-        
-        # Atualiza interface
-        self.pontuacao_label.config(text=f"Pontos: {self.pontuacao}")
-        self.tempo_label.config(text=f"Tempo: {self.tempo_restante}s")
-        
-        # Cria novo tabuleiro
+        # Recria o tabuleiro
         self.criar_tabuleiro()
-        self.iniciar_cronometro()
+
+        # Reinicia o jogo
+        self.iniciar_jogo()
 
 if __name__ == "__main__":
     root = tk.Tk()
