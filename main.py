@@ -1,10 +1,7 @@
 # Coisas para arrumar: 
 
-# - Ocultar caca palavra antes de iniciar o jogo
-# - Bloquear o "voltar" enquanto jogo esta ativo
 # - Adicionar Embaralhar durante partida
-# - Tirar caixas de notificação do resultado e mostrar na tela (*"BONITINHO"*)
-# - Implementar envio para o arduino
+# - Implementar envio para o arduino (CACA PALAVRA OK)
 # - Sobreposição de letra no caca palavra
 # - LOGO SENAC?
 
@@ -14,6 +11,8 @@ from tkinter import ttk, messagebox
 import random
 import math
 import string
+import serial
+import time
 import os
 
 # Cores oficiais do SENAC conforme o manual
@@ -32,6 +31,31 @@ selecao_letra_caca_palavra = "sandy brown" # "tan" "burlywood" "wheat" "peru" "s
 
 # Variável para ajuste do padding do canvas da roleta
 PADDING_CANVAS_ROLETA = 100  # Valor padrão, pode ser ajustado
+
+# Configuração da porta serial
+PORTA_SERIAL = 'COM6'
+BAUD_RATE = 9600
+
+try:
+    arduino = serial.Serial(PORTA_SERIAL, BAUD_RATE, timeout=1)
+    time.sleep(2)
+    print("Conexão com o Arduino estabelecida!")
+except Exception as e:
+    print(f"Erro ao conectar na porta serial: {e}")
+    arduino = None
+
+def enviar_comando(comando):
+    """Envia um comando para o Arduino via porta serial."""
+
+    print(f"Enviando comando arduino: {comando}")
+    if arduino:
+        try:
+            arduino.write(f"{comando}\n".encode())
+            print(f"Comando enviado ao Arduino: {comando}")
+        except Exception as e:
+            print(f"Erro ao enviar comando: {e}")
+    else:
+        print("Erro: Arduino não conectado.")
 
 class MainApplication:
     def __init__(self, root):
@@ -174,6 +198,9 @@ class RoletaFrame(tk.Frame):
             command=self.girar_seta
         )
         self.btn_girar.pack(pady=20)
+
+        self.label_resultado = tk.Label(main_frame, text="", font=("Helvetica", 14), bg=fundo, fg=AZUL_SENAC)
+        self.label_resultado.pack()
     
     def desenhar_roleta(self):
         for i in range(self.setores):
@@ -255,7 +282,7 @@ class RoletaFrame(tk.Frame):
         for cor, qtd in quantidades.items():
             resultado_texto += f"{cor}: {qtd}\n"
         
-        messagebox.showinfo("Resultado", resultado_texto)
+        self.label_resultado.config(text=resultado_texto)
         
         # Se houver callback, chamar com os resultados
         if self.callback:
@@ -266,8 +293,13 @@ class CacaPalavrasFrame(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.callback = None
-        self.jogando = False  # Inicialmente não está jogando
+        self.jogando = False
         self.setup_ui()
+
+    def voltar_menu(self):
+        if not self.jogando:
+            self.frame_tabuleiro.pack_forget()
+            self.controller.show_frame("MenuFrame")
     
     def setup_ui(self):
         self.configure(bg=fundo)
@@ -275,15 +307,6 @@ class CacaPalavrasFrame(tk.Frame):
         # Frame principal
         main_frame = tk.Frame(self, bg=fundo)
         main_frame.pack(expand=True, fill="both", padx=40, pady=20)
-        
-        # Botão de voltar
-        btn_voltar = ttk.Button(
-            main_frame,
-            text="Voltar ao Menu",
-            style='Action.TButton',
-            command=lambda: self.controller.show_frame("MenuFrame")
-        )
-        btn_voltar.pack(pady=20, anchor="nw")
         
         # Configurações do jogo
         self.tabela_size = 15
@@ -335,6 +358,15 @@ class CacaPalavrasFrame(tk.Frame):
         self.criar_tabuleiro()
 
         self.frame_tabuleiro.pack_forget()
+
+        # Botão de voltar
+        self.btn_voltar = ttk.Button(
+            main_frame,
+            text="Voltar ao Menu",
+            style='Action.TButton',
+            command=self.voltar_menu
+        )
+        self.btn_voltar.pack(pady=20, anchor="nw")
 
     def criar_tabuleiro(self):
         # Inicializa tabela vazia
@@ -446,22 +478,22 @@ class CacaPalavrasFrame(tk.Frame):
     
     def finalizar_jogo(self, vencedor):
         self.jogando = False
+        self.btn_voltar.config(state="normal")
         
         for linha in self.labels:
             for btn in linha:
                 btn.config(state="disabled")
         
         if vencedor:
-            mensagem = f"Parabéns! Você encontrou todas as palavras!\nPontuação: {self.pontuacao}"
+            mensagem = f"Parabéns! Você encontrou todas as palavras!"
         else:
-            mensagem = f"Tempo esgotado!\nPalavras encontradas: {len(self.palavras_encontradas)}/{len(self.palavras)}\nPontuação: {self.pontuacao}"
+            mensagem = f"Tempo esgotado!"
         
-        messagebox.showinfo("Fim do Jogo", mensagem)
+        self.tempo_label.config(text=mensagem)
         
-        # Se houver callback, chamar com os resultados
-        if self.callback:
-            resultado = {palavra: 3 if palavra in self.palavras_encontradas else 0 
-                        for palavra in self.palavras}
+        resultado = {palavra: 3 if palavra in self.palavras_encontradas else 0 
+                    for palavra in self.palavras}
+        enviar_comando(resultado)
 
     def iniciar_jogo(self):
         """Inicia o jogo quando o botão é clicado"""
@@ -473,6 +505,7 @@ class CacaPalavrasFrame(tk.Frame):
             self.pontuacao_label.config(text=f"Pontos: {self.pontuacao}")
             self.tempo_label.config(text=f"Tempo: {self.tempo_restante}s")
             self.btn_iniciar.config(text="Reiniciar")
+            self.btn_voltar.config(state="disabled")
 
             for linha in self.labels:
                 for btn in linha:
