@@ -1,7 +1,6 @@
 # Coisas para arrumar: 
 
 # - Adicionar Embaralhar durante partida
-# - Implementar envio para o arduino (CACA PALAVRA OK)
 # - Sobreposição de letra no caca palavra
 # - LOGO SENAC?
 
@@ -261,6 +260,7 @@ class RoletaFrame(tk.Frame):
                 passo_atual += 1
             else:
                 quantidades = self.gerar_comando(numero_vencedor)
+                enviar_comando(quantidades)
                 self.exibir_resultado(quantidades, numero_vencedor)
                 self.btn_girar.config(state="normal")
                 self.jogando = False
@@ -283,10 +283,7 @@ class RoletaFrame(tk.Frame):
             resultado_texto += f"{cor}: {qtd}\n"
         
         self.label_resultado.config(text=resultado_texto)
-        
-        # Se houver callback, chamar com os resultados
-        if self.callback:
-            self.callback(quantidades)
+
 
 class CacaPalavrasFrame(tk.Frame):
     def __init__(self, parent, controller):
