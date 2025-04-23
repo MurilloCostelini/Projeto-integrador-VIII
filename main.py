@@ -26,7 +26,7 @@ letra_titulo_menu = AZUL_SENAC
 letra_botao_menu = AZUL_SENAC
 fundo_roleta = "white"       # Fundo do canvas da roleta
 letra_dados_caca_palavra = AZUL_SENAC
-selecao_letra_caca_palavra = "sandy brown" # "tan" "burlywood" "wheat" "peru" "sandy brown"
+selecao_letra_caca_palavra = "pink" # "tan" "burlywood" "wheat" "peru" "sandy brown"
 
 # Variável para ajuste do padding do canvas da roleta
 PADDING_CANVAS_ROLETA = 100  # Valor padrão, pode ser ajustado
@@ -420,24 +420,65 @@ class CacaPalavrasFrame(tk.Frame):
     def selecionar_letra(self, x, y):
         if not self.jogando:
             return
-            
-        btn = self.labels[x][y]
+
         if (x, y) in self.selecao:
-            btn.config(bg="white")
+            # Deselecionar letra
             self.selecao.remove((x, y))
+
+            # Verifica se essa letra pertence a alguma palavra já marcada
+            pertence_a_palavra = False
+            for palavra in self.palavras_encontradas:
+                if (x, y) in self.get_posicoes_palavra(palavra):
+                    cor = self.cor_palavra(palavra)
+                    self.labels[x][y].config(bg=cor)
+                    pertence_a_palavra = True
+                    break
+
+            if not pertence_a_palavra:
+                self.labels[x][y].config(bg="white")
         else:
-            btn.config(bg=selecao_letra_caca_palavra)
             self.selecao.append((x, y))
-        
+            self.labels[x][y].config(bg=selecao_letra_caca_palavra)
+
         palavra = self.verificar_palavra()
         if palavra in self.palavras and palavra not in self.palavras_encontradas:
             self.marcar_palavra(palavra)
             self.pontuacao += 3
             self.pontuacao_label.config(text=f"Pontos: {self.pontuacao}")
             self.palavras_encontradas.add(palavra)
-            
+
             if len(self.palavras_encontradas) == len(self.palavras):
                 self.finalizar_jogo(vencedor=True)
+    
+    def cor_palavra(self, palavra):
+        cores = {
+            "VERMELHO": "red",
+            "VERDE": "green",
+            "AMARELO": "yellow",
+            "AZUL": "blue",
+            "LARANJA": "orange"
+        }
+        return cores.get(palavra, "white")
+
+
+    def get_posicoes_palavra(self, palavra):
+        """Retorna todas as coordenadas (x, y) onde a palavra está posicionada no tabuleiro"""
+        posicoes = []
+        for i in range(self.tabela_size):
+            for j in range(self.tabela_size):
+                for dx, dy in [(0, 1), (1, 0), (1, 1), (-1, 1)]:
+                    coords = []
+                    for k in range(len(palavra)):
+                        nx, ny = i + k*dx, j + k*dy
+                        if 0 <= nx < self.tabela_size and 0 <= ny < self.tabela_size:
+                            coords.append((nx, ny))
+                        else:
+                            break
+                    palavra_montada = "".join(self.tabela[x][y] for x, y in coords) if len(coords) == len(palavra) else ""
+                    if palavra_montada == palavra:
+                        return coords
+        return []
+
     
     def verificar_palavra(self):
         if len(self.selecao) < 2:
@@ -462,7 +503,7 @@ class CacaPalavrasFrame(tk.Frame):
 
 
         for x, y in self.selecao:
-            self.labels[x][y].config(bg=cor, state="disabled")
+            self.labels[x][y].config(bg=cor)
         self.selecao = []
     
     def iniciar_cronometro(self):
