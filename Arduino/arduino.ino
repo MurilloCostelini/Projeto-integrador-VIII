@@ -1,7 +1,7 @@
 #include <Stepper.h>
 
 #define STEPS_PER_REV 2048 // Passos para uma volta completa 
-#define DEGREE_STEPS (STEPS_PER_REV / 360.0)*(-1) // Passos por grau * -1 Pq é anti horário
+#define DEGREE_STEPS (STEPS_PER_REV / 360.0)*(-1) // Passos por grau * -1 (anti horário)
 
 /*   QUAL PINO DO MOTOR PARA QUAL PINO DO ARDUINO:
 
@@ -21,19 +21,13 @@ Stepper motor5(STEPS_PER_REV, 50, 52, 51, 53);  // Motor VERDE      - 5
 
 const int MOTOR_SPEED = 15;
 
-const int RELE_PIN = 7;
-
 void realizarMovimento(Stepper &motor, int quantidade) {
-  digitalWrite(RELE_PIN, HIGH);
-
   for (int i = 0; i < quantidade; i++) {
     motor.step(DEGREE_STEPS * -155);
     delay(800);
     motor.step(DEGREE_STEPS * 155);
     delay(800);
   }
-  
-  digitalWrite(RELE_PIN, LOW);
 }
 
 void setup() {
@@ -43,7 +37,6 @@ void setup() {
   motor4.setSpeed(MOTOR_SPEED);
   motor5.setSpeed(MOTOR_SPEED);
 
-  pinMode(RELE_PIN, OUTPUT);
   digitalWrite(RELE_PIN, LOW);
 
   Serial.begin(9600);
