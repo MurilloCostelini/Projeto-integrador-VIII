@@ -54,6 +54,8 @@ cd dispenser-confeitos
 
 #### Navegue para a versão desejada
 
+📌 Versão estável **v1.0**
+
 ```bash
 git checkout v1.0
 ```
